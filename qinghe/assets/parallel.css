@@ -1,0 +1,75 @@
+/* The experiment lives on its own page; the statistics entry stays compact. */
+.parallel-entry { display: flex; align-items: center; gap: 17px; width: 100%; margin-top: 16px; text-align: left; }
+.parallel-entry-art { position: relative; width: 57px; height: 67px; flex-shrink: 0; }
+.parallel-entry-art i { position: absolute; display: block; width: 35px; height: 49px; border-radius: 10px; border: 1px solid var(--line); background: var(--green2); left: 2px; top: 5px; transform: rotate(-9deg); }
+.parallel-entry-art i:last-child { left: 20px; top: 13px; background: var(--card); transform: rotate(8deg); box-shadow: 0 3px 12px #243d2810; }
+.parallel-entry-art i::after { content: ''; position: absolute; top: 15px; left: 8px; width: 17px; height: 11px; border-top: 2px solid var(--green); border-bottom: 2px solid var(--green); opacity: .45; }
+.parallel-entry-copy { min-width: 0; flex: 1; }
+.parallel-entry-copy > strong { display: block; font-size: 16px; }
+.parallel-entry-caption { display: block; font-size: 10px; color: var(--muted); line-height: 1.8; margin-top: 5px; }
+.parallel-entry-plan { display: block; font-size: 12px; margin-top: 7px; overflow-wrap: anywhere; }
+.parallel-entry-link { display: block; color: var(--green); font-size: 11px; margin-top: 9px; }
+.parallel-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 11px; }
+.parallel-header > button { min-height: 40px; }
+.parallel-local { font-size: 9px; border: 1px solid var(--line); border-radius: 20px; padding: 5px 8px; }
+.parallel-title { margin: 19px 0 20px; }
+.parallel-title h1 { font-size: 27px; font-weight: 650; line-height: 1.4; overflow-wrap: anywhere; }
+.parallel-title p { color: var(--muted); font-size: 11px; margin-top: 7px; }
+.parallel-welcome { background: linear-gradient(135deg, var(--card), var(--green2)); padding: 25px; }
+.parallel-overline { display: block; color: var(--muted); font-size: 10px; letter-spacing: .4px; }
+.parallel-welcome h2 { font-size: 28px; font-weight: 550; line-height: 1.6; margin: 15px 0; }
+.parallel-welcome p { color: var(--muted); font-size: 12px; line-height: 1.9; max-width: 300px; }
+.parallel-welcome .button { margin-top: 23px; }
+.parallel-empty { font-size: 12px; line-height: 1.9; color: var(--muted); padding: 25px 0; }
+.parallel-caption { font-size: 10px; line-height: 1.9; color: var(--muted); margin: 16px 0; }
+.parallel-saved-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px; }
+.parallel-saved { padding: 0; overflow: hidden; }
+.parallel-saved-open { display: block; text-align: left; width: 100%; padding: 20px 20px 12px; }
+.parallel-saved-open strong { display: block; font-size: 17px; margin: 10px 0; overflow-wrap: anywhere; }
+.parallel-saved-context { font-size: 10px; color: var(--muted); }
+.parallel-saved-result { display: block; font-size: 12px; overflow-wrap: anywhere; }
+.parallel-delete { color: var(--muted); font-size: 10px; padding: 7px 20px 14px; min-height: 36px; }
+.parallel-editor-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; color: var(--muted); font-size: 10px; }
+.parallel-editor-meta > button { min-height: 36px; flex-shrink: 0; font-size: 11px; }
+.parallel-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.parallel-comparison > .card { padding: 19px 14px; min-width: 0; }
+.parallel-after { background: var(--green2); border-color: transparent; }
+.parallel-comparison small { display: block; font-size: 10px; color: var(--muted); margin-top: 22px; }
+.parallel-comparison strong { display: block; font-size: clamp(18px, 5.6vw, 28px); letter-spacing: -.8px; font-weight: 600; margin: 4px 0 14px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.parallel-net { display: block; font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+.parallel-difference { text-align: center; font-size: 13px; color: var(--green); padding: 15px 5px; overflow-wrap: anywhere; }
+.parallel-toolbar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin: 2px 0 18px; }
+.parallel-toolbar .button { font-size: 11px; padding: 10px 6px; min-height: 44px; }
+.parallel-toolbar .icon { width: 15px; height: 15px; flex-shrink: 0; }
+.parallel-changes h2 { font-size: 15px; }
+.parallel-change { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px solid var(--line); padding: 15px 0; }
+.parallel-change:first-of-type { margin-top: 12px; }
+.parallel-change-copy { flex: 1; min-width: 0; }
+.parallel-change-copy strong { display: block; font-size: 12px; font-weight: 550; overflow-wrap: anywhere; }
+.parallel-change-copy small { display: block; font-size: 9px; color: var(--muted); margin: 4px 0; }
+.parallel-change-copy > span { display: block; font-size: 11px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.parallel-change-copy > span > span { color: var(--muted); padding: 0 4px; }
+.parallel-change-actions { display: flex; flex-direction: column; flex-shrink: 0; }
+.parallel-change-actions > button { min-height: 34px; font-size: 10px; color: var(--green); padding: 4px 5px; }
+.parallel-change-actions > button:last-child { color: var(--muted); }
+.parallel-save-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; position: sticky; bottom: calc(88px + env(safe-area-inset-bottom)); padding: 12px 0; background: var(--bg); z-index: 3; border-top: 1px solid var(--line); }
+.parallel-save-row > span { font-size: 10px; color: var(--muted); }
+.parallel-save-row .button { min-height: 42px; font-size: 12px; }
+.parallel-picker-tip { font-size: 10px; color: var(--muted); line-height: 1.8; margin: 9px 0; }
+.parallel-picker-list { max-height: 32vh; overflow-y: auto; overscroll-behavior: contain; }
+.parallel-pick-row { display: flex; gap: 10px; align-items: center; border-top: 1px solid var(--line); padding: 13px 0; margin: 0; color: var(--ink); }
+.parallel-pick-row input { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--green); }
+.parallel-pick-row > span { flex: 1; min-width: 0; }
+.parallel-pick-row strong { display: block; font-size: 12px; font-weight: 550; overflow-wrap: anywhere; }
+.parallel-pick-row small { display: block; font-size: 9px; color: var(--muted); margin-top: 3px; }
+.parallel-pick-row b { max-width: 35%; overflow-wrap: anywhere; font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.parallel-selected-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 10px; color: var(--muted); }
+.parallel-selected-row button { min-height: 36px; font-size: 10px; flex-shrink: 0; }
+.parallel-picker-actions { display: flex; gap: 8px; margin-top: 15px; }
+.parallel-picker-actions .button { flex: 1; font-size: 12px; padding: 10px 8px; }
+.parallel-open-more { display: block; width: 100%; min-height: 40px; font-size: 11px; color: var(--green); }
+@media (min-width: 800px) { .parallel-save-row { bottom: 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  .parallel-screen { animation: parallel-appear .16s ease-out; }
+  @keyframes parallel-appear { from { opacity: .5; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+}

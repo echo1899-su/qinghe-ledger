@@ -1,0 +1,23 @@
+# ---- 签名材料（绝不提交）----
+signing/
+*.jks
+*.keystore
+password.txt
+
+# ---- 构建产物 ----
+dist/
+.build/
+*.apk
+*.idsig
+
+# ---- 工具链（体积大，由使用者自行准备）----
+toolchain/
+
+# ---- 系统与编辑器 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+.idea/
+.vscode/
+__pycache__/

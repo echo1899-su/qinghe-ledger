@@ -1,0 +1,161 @@
+/* ============================================================
+   青禾 · iOS 手感调节层
+   原则：只做加法，不改原规则。不满意可以整份删掉，不影响功能。
+   ============================================================ */
+
+/* 1. 去掉安卓点击高亮方块、禁用双击缩放延迟 */
+html { -webkit-text-size-adjust: 100%; }
+body {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
+  -webkit-font-smoothing: antialiased;
+}
+button, .icon-btn, .chip, .category-pick, .note-chip, .transaction, [data-action] {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 2. 按压反馈 —— 按下即变，但留一点"呼吸"，不是瞬间闪完 */
+.button:active, .icon-btn:active, .quick-actions button:active,
+.category-pick:active, .note-chip:active, .transaction:active {
+  transition-duration: .13s;
+  transition-timing-function: cubic-bezier(.2, .7, .3, 1);
+}
+/* 2b. 常见交互元素统一放慢一档，看起来更自然 */
+.button, .icon-btn, .chip, .category-pick, .note-chip,
+.theme-choice, .settings-row, .day, .template-choice {
+  transition-duration: .14s;
+  transition-timing-function: cubic-bezier(.2, .7, .3, 1);
+}
+
+/* 3. 弹窗：iOS 的减速曲线（cubic-bezier(.32,.72,0,1)），不是弹跳 */
+#modal .sheet {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  contain: layout;   /* 弹窗内部的布局不外溢，动画时不重排整页 */
+}
+/* 4.0 照系统「应用窗口展开」：等比放大。
+   只动 transform / opacity（合成层，GPU 直接搬）；
+   不动 border-radius（那是绘制属性，每帧都要重画整块面板 → 卡）。 */
+#modal.overlay-enter .sheet.sheet-grow {
+  animation: sheet-morph .36s cubic-bezier(.2, .8, .2, 1) both;
+}
+@keyframes sheet-morph {
+  0%   { opacity: 1; transform: scale(var(--sx, .40)); }
+  100% { opacity: 1; transform: scale(1); }
+}
+/* 放大过程中面板就是一块纯色卡片，内容稍晚出现 —— 绘制最便宜 */
+#modal.overlay-enter .sheet.sheet-grow > * {
+  animation: sheet-content .16s ease-out .07s both;
+}
+@keyframes sheet-content {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+#modal.closing .sheet {
+  animation: sheet-shrink .30s cubic-bezier(.4, 0, 1, 1) both;
+}
+/* 关闭：等比缩回小卡片，最后 30% 淡掉 */
+@keyframes sheet-shrink {
+  0%   { opacity: 1; transform: scale(1); }
+  70%  { opacity: 1; }
+  100% { opacity: 0; transform: scale(var(--sx, .40)); }
+}
+#modal.closing::before {
+  animation-duration: .26s !important;
+  animation-timing-function: linear !important;
+}
+#modal.overlay-enter::before {
+  animation-duration: .42s !important;
+  animation-timing-function: linear !important;
+}
+
+/* 4. 长列表：每一行独立布局，减少整页重排 */
+.transaction { contain: layout style; }
+
+/* 5. 页面切换过渡（B 方案）：淡入 + 轻微放大，0.985 → 1 */
+.main.page-in {
+  animation: page-rise .26s cubic-bezier(.2, .7, .3, 1) both;
+  will-change: transform, opacity;
+}
+@keyframes page-rise {
+  from { opacity: 0; transform: scale(.985); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* 6. 底部导航：选中块平滑位移（C 方案）
+   注意：不要改 .bottom-nav 的 position（原样式是 fixed），否则导航会掉出屏幕。 */
+.bottom-nav button { position: relative; z-index: 1; }
+.nav-glide {
+  position: absolute; left: 0; top: 0;
+  width: 44px; height: 28px; border-radius: 14px;
+  background: var(--green2);
+  pointer-events: none; opacity: 0; z-index: 0;
+  will-change: transform;
+  transition: transform .32s cubic-bezier(.22, 1, .36, 1), opacity .18s ease;
+}
+/* 滑动块接管之后，原按钮里的选中底色就不需要再闪一次 */
+.bottom-nav.glide-on .tab-symbol::before { opacity: 0 !important; transform: none !important; }
+
+/* 7. 系统「减少动态效果」优先 */
+@media (prefers-reduced-motion: reduce) {
+  #modal .sheet { animation: none !important; }
+  .main.page-in { animation: none !important; }
+  .nav-glide { transition: none !important; }
+}
+
+/* 8. 下拉框：换成 App 自己的选择器
+   （原生 <select> 弹的是安卓灰底列表，和暖白圆角完全不搭） */
+.sel-wrap { position: relative; }
+.sel-wrap > select {
+  position: absolute; inset: 0; opacity: 0; pointer-events: none;
+}
+.sel-wrap > .sel-btn {
+  width: 100%; text-align: left;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-radius: 14px;
+  background: var(--card); border: 1px solid var(--line);
+  color: var(--ink); font-size: 14px; font-family: inherit;
+  transition: border-color .14s ease, background-color .14s ease;
+}
+.sel-wrap > .sel-btn:active { background: var(--green2); }
+.sel-wrap > .sel-btn::after {
+  content: ""; width: 7px; height: 7px; flex: none; margin-left: 10px;
+  border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg) translateY(-2px);
+}
+
+#picker {
+  position: fixed; inset: 0; z-index: 60; display: none;
+  align-items: flex-end; justify-content: center;
+  background: #15251d55; opacity: 0; transition: opacity .18s ease;
+}
+#picker.on { display: flex; opacity: 1; }
+.picker-sheet {
+  width: 100%; max-width: 560px;
+  background: var(--card); border-radius: 26px 26px 0 0;
+  padding: 10px 12px calc(16px + env(safe-area-inset-bottom));
+  max-height: 72vh; overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform .26s cubic-bezier(.2, .8, .2, 1);
+}
+#picker.on .picker-sheet { transform: none; }
+.picker-title {
+  font-size: 12px; color: var(--muted); padding: 8px 10px 10px; font-weight: 600;
+}
+.picker-item {
+  display: block; width: 100%; text-align: left;
+  padding: 14px 12px; border-radius: 14px;
+  background: none; border: 0; color: var(--ink);
+  font-size: 15px; font-family: inherit;
+  transition: background-color .12s ease;
+}
+.picker-item:active { background: var(--green2); }
+.picker-item.sel { background: var(--green2); color: var(--green); font-weight: 700; }
+
+/* 9. Life comparisons: local SVG illustrations and illustrative prices. */
+.life-card{margin-top:16px}.life-heading{display:flex;justify-content:space-between;align-items:center;gap:10px}.life-heading h3{font-size:16px}.life-heading p{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.6}.life-library-count{font-size:9px;color:var(--green);border:1px solid var(--line);border-radius:20px;padding:5px 8px;white-space:nowrap}.life-basis{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:11px;color:var(--muted);margin:17px 0 14px}.life-basis strong{font-size:13px;color:var(--ink);font-weight:600;overflow-wrap:anywhere}.life-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:3px;background:var(--bg);border-radius:11px;margin-bottom:13px;gap:3px}.life-tab{min-height:36px;padding:7px 3px;font-size:11px;border-radius:8px;color:var(--muted);transition:background-color .15s ease,color .15s ease}.life-tab.active{background:var(--card);color:var(--green);font-weight:600;box-shadow:0 1px 5px #1c38200a}.life-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;--life-tone:#957251;--life-bg:#f8f3e9}.life-grid[data-group=travel]{--life-tone:#63858f;--life-bg:#edf4f4}.life-grid[data-group=fun]{--life-tone:#6e8b65;--life-bg:#f0f5eb}.life-grid[data-group=daily]{--life-tone:#8b7c97;--life-bg:#f5f0f6}.life-tile{min-width:0;padding:12px;border-radius:15px;background:var(--life-bg);border:1px solid transparent}.life-item-heading{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--ink)}.life-art{width:32px;height:32px;flex-shrink:0;color:var(--life-tone)}.life-result{display:flex;align-items:baseline;gap:4px;margin-top:9px;line-height:1.35;flex-wrap:wrap;color:var(--ink);font-variant-numeric:tabular-nums}.life-approx{font-size:13px;color:var(--life-tone)}.life-result strong{font-size:23px;font-weight:600;letter-spacing:-.7px;overflow-wrap:anywhere;min-width:0}.life-unit{font-size:10px;color:var(--muted)}.life-price{font-size:9px;color:var(--muted);margin-top:5px;line-height:1.5}.life-footnote{font-size:9px;line-height:1.8;color:var(--muted);margin-top:12px}.life-empty{font-size:10px;color:var(--green);margin-top:8px}
+body[data-theme=dark] .life-grid{--life-tone:#c9b18d;--life-bg:#30352c}body[data-theme=dark] .life-grid[data-group=travel]{--life-tone:#a7c5ce;--life-bg:#29393b}body[data-theme=dark] .life-grid[data-group=fun]{--life-tone:#b2c99e;--life-bg:#2c3b2e}body[data-theme=dark] .life-grid[data-group=daily]{--life-tone:#c4b2cf;--life-bg:#35313d}
+@media(max-width:359px){.life-tile{padding:10px}.life-result strong{font-size:21px}.life-heading p{font-size:9px}.life-library-count{padding:5px 6px}.life-art{width:29px;height:29px}}
