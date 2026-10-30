@@ -6,6 +6,12 @@
 
 ---
 
+## 下载安装
+
+- **推荐**：到 [Releases](https://github.com/echo1899-su/qinghe-ledger/releases/latest) 下载 `qinghe-ledger-1.3.0.apk`（98 KB，已签名）
+- 仓库根目录也放了一份：[`qinghe-ledger-1.3.0.apk`](qinghe-ledger-1.3.0.apk)
+- 适用 Android 7.0 及以上；安装时需允许「安装未知来源应用」
+
 ## 它是什么
 
 打开就能记账。没有注册页，没有登录框，没有广告，没有内购，没有云同步。

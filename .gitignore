@@ -10,6 +10,9 @@ dist/
 *.apk
 *.idsig
 
+# 发布用安装包单独放行：只允许仓库根目录下 qinghe-ledger-x.y.z.apk 这一种命名
+!qinghe-ledger-[0-9]*.apk
+
 # ---- 工具链（体积大，由使用者自行准备）----
 toolchain/
 
