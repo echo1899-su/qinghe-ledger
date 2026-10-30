@@ -21,3 +21,6 @@ desktop.ini
 .idea/
 .vscode/
 __pycache__/
+
+# Local code navigation metadata
+.serena/

@@ -1,6 +1,7 @@
 (function(root,factory){const api=factory();if(typeof module==='object')module.exports=api;else root.Ledger=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
-const VERSION=1, LIMIT=99999999999;
+const VERSION=1, LIMIT=99999999999, MAX_STATE_BYTES=25000000;
+function stateJSON(s){validate(s);const raw=JSON.stringify(s);if(new TextEncoder().encode(raw).length>MAX_STATE_BYTES)throw Error("数据超过 25 MB，请先导出备份并减少图片体积");return raw;}
 const Scenarios=typeof module==='object'?require('./parallel-core.js'):globalThis.Parallel;
 const uid=()=> 'q'+Date.now().toString(36)+Math.random().toString(36).slice(2,11);
 const clone=o=>JSON.parse(JSON.stringify(o));
@@ -79,7 +80,7 @@ const aliases={date:['日期','时间','交易时间','记账时间','交易日�
 const headerKey=s=>String(s).toLowerCase().replace(/[\s()（）\[\]￥¥/：:_-]/g,'');
 function detectColumns(rows){let best=null;for(let n=0;n<Math.min(rows.length,40);n++){const map={};for(const [key,vals]of Object.entries(aliases))map[key]=rows[n].findIndex(h=>vals.includes(headerKey(h)));const score=(map.date>=0?5:0)+(map.amount>=0?5:0)+(map.type>=0?2:0)+(map.category>=0?1:0);if(!best||score>best.score)best={header:n,map,score};}return best||{header:0,map:{},score:0};}
 function fingerprint(t){return JSON.stringify([t.date,t.type,t.amount,t.category,t.account,t.to||'',t.book,t.note,t.tags,t.member||'']);}
-function importRows(original,rows,{header=0,map=detectColumns(rows).map,defaultBook='main',defaultAccount='cash',skipDuplicates=true}={}){
+function importRows(original,rows,{header=0,map=detectColumns(rows).map,defaultBook='main',defaultAccount='cash',skipDuplicates=true,missingType='reject'}={}){
  if(map.date<0||map.amount<0)throw Error('请指定日期和金额列');
  const s=clone(original),existing=new Map(),usedIds=new Set(s.transactions.map(t=>t.id));
  for(const t of s.transactions){const f=fingerprint(t);existing.set(f,(existing.get(f)||0)+1);}
@@ -89,7 +90,7 @@ function importRows(original,rows,{header=0,map=detectColumns(rows).map,defaultB
   const lengths=[s.books.length,s.accounts.length,s.categories.length];
   try{
    const date=parseDate(cell('date')),raw=amount(cell('amount'),true),tv=cell('type');if(!raw)throw Error('金额为零');
-   let type;if(/^(支出|expense|支)$/i.test(tv))type='expense';else if(/^(收入|income|收)$/i.test(tv))type='income';else if(/^(转账|transfer)$/i.test(tv))type='transfer';else if(!tv)type=raw<0?'expense':'expense';else throw Error('无法识别收支类型：'+tv);
+   let type;if(/^(支出|expense|支)$/i.test(tv))type='expense';else if(/^(收入|income|收)$/i.test(tv))type='income';else if(/^(转账|transfer)$/i.test(tv))type='transfer';else if(!tv){if(missingType==='signed')type=raw<0?'expense':'income';else if(missingType==='expense'||missingType==='income')type=missingType;else throw Error('缺少收支类型，请匹配类型列或选择无类型时的规则');}else throw Error('无法识别收支类型：'+tv);
    const book=plain('book')?lookup(s.books,plain('book'),()=>({id:uid(),name:plain('book')})):defaultBook;
    const account=plain('account')?lookup(s.accounts,plain('account'),()=>({id:uid(),name:plain('account'),icon:'💳',opening:0})):defaultAccount;
    const name=plain('category')||(type==='income'?'其他收入':'其他支出');let c=s.categories.find(x=>x.name===name&&x.type===type);
@@ -112,5 +113,5 @@ function exportCSV(s,rows=s.transactions){
 }
 /** 把金额换算成有画面感的说法：¥45 → 3杯奶茶 */
 function compare(n){const y=Number(n)/100;if(!(y>0))return '';if(y<6)return (Math.round(y*10)/10)+'元';const opts=[[15,'杯奶茶'],[20,'顿外卖'],[5,'趟地铁'],[40,'张电影票']];for(const o of opts){const v=y/o[0];if(v>=1&&v<100)return (v>=10?Math.round(v):Math.round(v*10)/10)+o[1];}const h=y/30;return (h>=10?Math.round(h):Math.round(h*10)/10)+'小时工资';}
-return {VERSION,LIMIT,uid,clone,today,amount,format,compare,validDate,parseDate,nextDate,initial,validate,balance,filtered,summary,groups,budget,runRules,parseCSV,detectColumns,importRows,exportCSV};
+return {VERSION,LIMIT,MAX_STATE_BYTES,stateJSON,uid,clone,today,amount,format,compare,validDate,parseDate,nextDate,initial,validate,balance,filtered,summary,groups,budget,runRules,parseCSV,detectColumns,importRows,exportCSV};
 });

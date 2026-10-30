@@ -1,0 +1,10 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const L=require('../qinghe/assets/core.js');
+const rows=[['日期','金额'],['2026-10-29','100'],['2026-10-28','-100']];
+test('missing types never silently become expenses',()=>{const r=L.importRows(L.initial(),rows);assert.equal(r.added,0);assert.equal(r.errors.length,2);});
+test('explicit signed and fixed rules',()=>{for(const [rule,expected] of [['signed',['income','expense']],['expense',['expense','expense']],['income',['income','income']]]){const r=L.importRows(L.initial(),rows,{missingType:rule});assert.deepEqual(r.state.transactions.map(t=>t.type),expected);assert.deepEqual(r.state.transactions.map(t=>t.amount),[10000,10000]);L.validate(r.state);}});
+test('type column takes precedence and unknown types still fail',()=>{const r=L.importRows(L.initial(),[['日期','金额','收支类型'],['2026-10-29','100','支出'],['2026-10-29','-200','收入'],['2026-10-29','100','不计收支']],{missingType:'signed'});assert.deepEqual(r.state.transactions.map(t=>t.type),['expense','income']);assert.equal(r.errors.length,1);});
+test('UTF-8 byte boundary including emoji',()=>{const s=L.initial();s.extra='';const overhead=Buffer.byteLength(JSON.stringify(s));s.extra='中😀'+'a'.repeat(L.MAX_STATE_BYTES-overhead-7);assert.equal(Buffer.byteLength(L.stateJSON(s)),L.MAX_STATE_BYTES);s.extra+='a';assert.throws(()=>L.stateJSON(s),/25 MB/);});
+test('previously accepted Chinese ledger is refused before persistence',()=>{const s=L.initial();for(let i=0;i<5000;i++)s.transactions.push({id:'audit'+i,date:'2026-10-29',type:'expense',amount:100,book:'main',account:'cash',category:'e0',note:'测'.repeat(1800),tags:''});L.validate(s);assert.ok(JSON.stringify(s).length<20000000);assert.throws(()=>L.stateJSON(s),/25 MB/);});
+test('normal backups round trip and invalid references remain rejected',()=>{const s=L.importRows(L.initial(),rows,{missingType:'signed'}).state;assert.deepEqual(L.validate(JSON.parse(L.stateJSON(s))),s);s.transactions[0].account='missing';assert.throws(()=>L.stateJSON(s));});

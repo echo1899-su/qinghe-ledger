@@ -2,7 +2,7 @@
 
 一款**完全离线**的安卓记账应用。不联网、不注册、不收集、不上传任何数据。
 
-包名 `local.qinghe.ledger` · Android 7.0+ · 安装包不到 100 KB
+包名 `local.qinghe.ledger` · Android 7.0+ · 轻量安装包
 
 ---
 
@@ -32,7 +32,7 @@
 
 ## 构建
 
-不需要 Gradle，也不需要 Android Studio——只有 JDK 和 Android SDK 命令行工具。
+当前构建脚本支持 **Windows**。需要 Python 3.10+、JDK 17 和 Android SDK 命令行工具（Build-Tools 35、Platform android-35）；不需要 Gradle 或 Android Studio。
 
 ### 1. 准备工具链
 
@@ -45,15 +45,17 @@ toolchain/
 └── platform/       Android SDK Platform（android-35，含 android.jar）
 ```
 
+每类工具支持直接解压到对应目录，也支持额外一层版本目录，例如 `jdk/jdk-17/bin/javac.exe`、`build-tools/35.0.0/aapt2.exe`、`platform/android-35/android.jar`。每类目录中只能放一套完整工具，缺失或多套都会明确报错。
+
 也可以放在任意位置，用环境变量指定：
 
-```bash
-export QINGHE_TOOLCHAIN=/path/to/toolchain
+```powershell
+$env:QINGHE_TOOLCHAIN = "D:\AndroidTools\toolchain"
 ```
 
 ### 2. 编译
 
-```bash
+```powershell
 python build/build_qinghe.py
 ```
 
@@ -82,10 +84,17 @@ qinghe-ledger/
     └── build_qinghe.py    构建脚本
 ```
 
+## 验证
+
+安装 Node.js 18+ 后，在仓库根目录运行 `node --test tests/*.test.js`。构建工具链查找测试运行 `python -m unittest discover -s tests -p "test_*.py"`。测试使用模拟数据，不连接手机。
+
 ## 数据格式
 
 - 金额以**整数分**存储，避免浮点误差
 - 保存时先写临时文件、再原子替换，并保留上一份内部副本
+- 读写统一限制为 25,000,000 个 UTF-8 字节，超限会在写入前拒绝。
+- 读取失败页支持导出原始文件（包括超限或损坏文件）、验证并恢复上一份内部副本。恢复前的首份原文件另存为 `ledger.before-recovery.json`，后续恢复不覆盖该留底；失败页可导出它。恢复不会自动丢弃坏记录。
+- 表格导入缺少收支类型时默认跳过并报告；可明确选择正数收入/负数支出、全部支出或全部收入。
 - 内部副本**不能**替代外部备份——换机或卸载前请手动导出
 
 ## 说明

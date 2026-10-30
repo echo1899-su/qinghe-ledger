@@ -32,25 +32,28 @@ TOOL = Path(os.environ.get("QINGHE_TOOLCHAIN") or ROOT / "toolchain")
 BUILD = ROOT / ".build"      # 中间产物，已在 .gitignore 中忽略
 SIGN = ROOT / "signing"      # 签名材料，绝不提交
 
-for d in (OUT, BUILD, SIGN):
-    d.mkdir(parents=True, exist_ok=True)
-
-
 def pick(sub: str) -> Path:
-    """从 toolchain/<sub> 里取第一个目录（版本号目录名不固定）。"""
+    """Accept an extracted tool directly or exactly one matching version folder."""
+    required = {"jdk": ["bin/java.exe", "bin/javac.exe", "bin/keytool.exe"],
+                "build-tools": ["aapt2.exe", "zipalign.exe", "lib/d8.jar", "lib/apksigner.jar"],
+                "platform": ["android.jar"]}[sub]
     base = TOOL / sub
-    if not base.is_dir():
-        raise SystemExit(
-            f"找不到 {base}\n"
-            "请把 JDK、Android SDK build-tools、platform 放进 toolchain/，"
-            "或用环境变量 QINGHE_TOOLCHAIN 指定。"
-        )
-    return next(p for p in base.iterdir() if p.is_dir())
+    candidates = [base]
+    if base.is_dir():
+        candidates += sorted(p for p in base.iterdir() if p.is_dir())
+    matches = [p for p in candidates if all((p / name).is_file() for name in required)]
+    if len(matches) != 1:
+        raise SystemExit(f"工具链 {base} 必须包含且仅包含一套有效工具；找到 {len(matches)} 套。需要：{', '.join(required)}")
+    return matches[0]
 
 
+if os.name != "nt":
+    raise SystemExit("当前构建脚本仅支持 Windows，请使用 Windows 的 JDK 和 Android SDK。")
 JDK = pick("jdk")
 BT = pick("build-tools")
 PLATFORM = pick("platform")
+for d in (OUT, BUILD, SIGN):
+    d.mkdir(parents=True, exist_ok=True)
 
 env = os.environ.copy()
 env["JAVA_HOME"] = str(JDK)
