@@ -4,6 +4,8 @@
 
 包名 `local.qinghe.ledger` · Android 7.0+ · 轻量安装包
 
+![青禾账本界面](docs/screenshots/hero.png)
+
 ---
 
 ## 下载安装
@@ -29,6 +31,8 @@
 - **导出**：完整备份 JSON、CSV / XLSX、月报 PDF
 - **安全**：密码锁屏、桌面小组件、每日提醒
 - **外观**：晴日 / 青禾 / 夜色 三套主题
+
+![三套主题](docs/screenshots/themes.png)
 
 ## 隐私
 
